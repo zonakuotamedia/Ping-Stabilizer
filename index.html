@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Stabilizer Ping Game Android</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+      color: #ffffff;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #00ffcc;
+      margin-bottom: 10px;
+    }
+    #ping-value {
+      font-size: 2em;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    canvas {
+      max-width: 100%;
+      margin-bottom: 20px;
+    }
+    #history {
+      max-height: 200px;
+      overflow-y: auto;
+      text-align: left;
+      margin: 0 auto;
+      width: 90%;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .history-item {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Stabilizer Ping Game Android</h1>
+  <div id="ping-value">Mengukur...</div>
+  <canvas id="pingChart" height="100"></canvas>
+  <div id="history">
+    <strong>Riwayat Ping:</strong>
+    <div id="ping-history"></div>
+  </div>
+
+  <script>
+    const pingDisplay = document.getElementById('ping-value');
+    const ctx = document.getElementById('pingChart').getContext('2d');
+    const pingHistoryDiv = document.getElementById('ping-history');
+    const data = {
+      labels: [],
+      datasets: [{
+        label: 'Ping (ms)',
+        data: [],
+        borderColor: '#00ff00',
+        backgroundColor: 'rgba(0,255,0,0.1)',
+        borderWidth: 2,
+        tension: 0.2
+      }]
+    };
+    const config = {
+      type: 'line',
+      data,
+      options: {
+        responsive: true,
+        scales: {
+          x: { display: false },
+          y: { beginAtZero: true, max: 500 }
+        }
+      }
+    };
+    const pingChart = new Chart(ctx, config);
+
+    let counter = 0;
+
+    function updatePing() {
+      const start = performance.now();
+      fetch("https://dns.google/resolve?name=google.com")
+        .then(() => {
+          const ping = Math.round(performance.now() - start);
+          const time = new Date().toLocaleTimeString();
+
+          if (data.labels.length > 20) {
+            data.labels.shift();
+            data.datasets[0].data.shift();
+          }
+
+          data.labels.push(time);
+          data.datasets[0].data.push(ping);
+
+          if (ping < 100) {
+            pingDisplay.style.color = 'lime';
+            data.datasets[0].borderColor = '#00ff00';
+          } else if (ping < 200) {
+            pingDisplay.style.color = 'orange';
+            data.datasets[0].borderColor = 'orange';
+          } else {
+            pingDisplay.style.color = 'red';
+            data.datasets[0].borderColor = 'red';
+          }
+
+          pingDisplay.textContent = ping + " ms";
+          pingChart.update();
+
+          counter++;
+          if (counter % 2 === 0) { // Setiap 5 detik (2x 2.5s)
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            historyItem.textContent = `${time} → ${ping} ms`;
+            pingHistoryDiv.prepend(historyItem);
+            if (pingHistoryDiv.childNodes.length > 50) {
+              pingHistoryDiv.removeChild(pingHistoryDiv.lastChild);
+            }
+          }
+        })
+        .catch(() => {
+          pingDisplay.style.color = 'gray';
+          pingDisplay.textContent = "Gagal Mengukur";
+        });
+    }
+
+    setInterval(updatePing, 2500); // Ping tiap 2.5 detik
+  </script>
+</body>
+</html>
