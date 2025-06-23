@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Ping Stabilizer | Professional Edition</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --secondary: #3f37c9;
+      --accent: #4cc9f0;
+      --success: #4ade80;
+      --warning: #facc15;
+      --danger: #f87171;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --chart-gradient-start: rgba(76, 201, 240, 0.3);
+      --chart-gradient-end: rgba(67, 97, 238, 0.1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', 'Poppins', sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: var(--dark);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: var(--card-bg);
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    header {
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+      padding: 25px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    header::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+      transform: rotate(30deg);
+    }
+    
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 2;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .subtitle {
+      font-size: 1rem;
+      opacity: 0.9;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .ping-section {
+      padding: 30px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .ping-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .ping-card {
+      text-align: center;
+      padding: 15px;
+      flex: 1;
+    }
+    
+    .ping-card h3 {
+      font-size: 1rem;
+      color: var(--secondary);
+      margin-bottom: 10px;
+    }
+    
+    #ping-value {
+      font-size: 2.8rem;
+      font-weight: 800;
+      transition: all 0.3s ease;
+      margin: 5px 0;
+    }
+    
+    .ping-status {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    
+    .chart-container {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 25px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    canvas {
+      width: 100%;
+      height: 200px;
+    }
+    
+    .history-container {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .history-header h2 {
+      font-size: 1.3rem;
+      color: var(--secondary);
+    }
+    
+    #history {
+      max-height: 200px;
+      overflow-y: auto;
+      text-align: left;
+    }
+    
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+    
+    .history-time {
+      color: #6c757d;
+    }
+    
+    .ping-ms {
+      font-weight: 600;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 25px;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .stat-card i {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+    
+    .stat-card h3 {
+      font-size: 1.8rem;
+      margin-bottom: 5px;
+      color: var(--secondary);
+    }
+    
+    .stat-card p {
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+    
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #6c757d;
+      font-size: 0.9rem;
+      border-top: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    /* Animations */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .pulse {
+      animation: pulse 0.5s ease;
+    }
+    
+    /* Scrollbar styling */
+    #history::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    #history::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.05);
+      border-radius: 10px;
+    }
+    
+    #history::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 10px;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .ping-info {
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-wifi"></i> Stabilizer Ping Game Android</h1>
+      <p class="subtitle">Monitor koneksi jaringan Anda secara real-time untuk pengalaman gaming terbaik</p>
+    </header>
+    
+    <section class="ping-section">
+      <div class="ping-info">
+        <div class="ping-card">
+          <h3>PING SEKARANG</h3>
+          <div id="ping-value">Mengukur...</div>
+          <div id="ping-status" class="ping-status">Menginisialisasi</div>
+        </div>
+        
+        <div class="ping-card">
+          <h3>STATUS JARINGAN</h3>
+          <div id="network-type">Mendeteksi...</div>
+          <div id="network-strength">-</div>
+        </div>
+      </div>
+      
+      <div class="chart-container">
+        <canvas id="pingChart"></canvas>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <i class="fas fa-bolt"></i>
+          <h3 id="min-ping">-</h3>
+          <p>PING TERENDAH</p>
+        </div>
+        
+        <div class="stat-card">
+          <i class="fas fa-chart-line"></i>
+          <h3 id="avg-ping">-</h3>
+          <p>RATA-RATA</p>
+        </div>
+        
+        <div class="stat-card">
+          <i class="fas fa-exclamation-triangle"></i>
+          <h3 id="max-ping">-</h3>
+          <p>PING TERTINGGI</p>
+        </div>
+      </div>
+      
+      <div class="history-container">
+        <div class="history-header">
+          <h2><i class="fas fa-history"></i> Riwayat Ping</h2>
+          <button id="clear-history"><i class="fas fa-trash"></i> Bersihkan</button>
+        </div>
+        <div id="history">
+          <div id="ping-history"></div>
+        </div>
+      </div>
+    </section>
+    
+    <footer>
+      <p>Stabilizer Ping Game Android &copy; 2023 | Professional Edition</p>
+    </footer>
+  </div>
+
+  <script>
+    // Elements
+    const pingDisplay = document.getElementById('ping-value');
+    const pingStatus = document.getElementById('ping-status');
+    const ctx = document.getElementById('pingChart').getContext('2d');
+    const pingHistoryDiv = document.getElementById('ping-history');
+    const minPingEl = document.getElementById('min-ping');
+    const avgPingEl = document.getElementById('avg-ping');
+    const maxPingEl = document.getElementById('max-ping');
+    const clearHistoryBtn = document.getElementById('clear-history');
+    const networkTypeEl = document.getElementById('network-type');
+    const networkStrengthEl = document.getElementById('network-strength');
+    
+    // Data arrays
+    const pingData = {
+      labels: [],
+      values: []
+    };
+    
+    // Chart configuration
+    const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+    gradient.addColorStop(0, 'rgba(76, 201, 240, 0.5)');
+    gradient.addColorStop(1, 'rgba(67, 97, 238, 0.1)');
+    
+    const chartConfig = {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Ping (ms)',
+          data: [],
+          borderColor: '#4361ee',
+          backgroundColor: gradient,
+          borderWidth: 3,
+          pointRadius: 4,
+          pointBackgroundColor: '#4361ee',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 300
+        },
+        scales: {
+          x: {
+            display: true,
+            grid: {
+              display: false
+            },
+            ticks: {
+              maxRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: 8
+            }
+          },
+          y: {
+            beginAtZero: true,
+            max: 500,
+            grid: {
+              color: 'rgba(0,0,0,0.05)'
+            },
+            ticks: {
+              stepSize: 100
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(67, 97, 238, 0.9)',
+            titleFont: {
+              size: 14
+            },
+            bodyFont: {
+              size: 14,
+              weight: 'bold'
+            },
+            padding: 10,
+            displayColors: false
+          }
+        }
+      }
+    };
+    
+    const pingChart = new Chart(ctx, chartConfig);
+    
+    // Statistics
+    let minPing = Infinity;
+    let maxPing = 0;
+    let totalPing = 0;
+    let pingCount = 0;
+    let counter = 0;
+    
+    // Network detection
+    function detectNetwork() {
+      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      
+      if (connection) {
+        networkTypeEl.textContent = connection.type.charAt(0).toUpperCase() + connection.type.slice(1);
+        networkStrengthEl.innerHTML = `${connection.downlink} Mbps <i class="fas fa-signal"></i>`;
+      } else {
+        networkTypeEl.textContent = "Tidak terdeteksi";
+        networkStrengthEl.textContent = "Cek koneksi";
+      }
+    }
+    
+    // Update stats
+    function updateStats(ping) {
+      // Update min ping
+      if (ping < minPing) {
+        minPing = ping;
+        minPingEl.textContent = `${ping} ms`;
+      }
+      
+      // Update max ping
+      if (ping > maxPing) {
+        maxPing = ping;
+        maxPingEl.textContent = `${ping} ms`;
+      }
+      
+      // Update average
+      totalPing += ping;
+      pingCount++;
+      const avg = Math.round(totalPing / pingCount);
+      avgPingEl.textContent = `${avg} ms`;
+    }
+    
+    // Clear history
+    clearHistoryBtn.addEventListener('click', () => {
+      pingHistoryDiv.innerHTML = '';
+    });
+    
+    // Ping function
+    function updatePing() {
+      const start = performance.now();
+      fetch("https://dns.google/resolve?name=google.com", { cache: "no-store" })
+        .then(() => {
+          const ping = Math.round(performance.now() - start);
+          const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          
+          // Add to chart
+          if (pingData.labels.length > 15) {
+            pingData.labels.shift();
+            pingData.values.shift();
+          }
+          
+          pingData.labels.push(time);
+          pingData.values.push(ping);
+          
+          // Update chart
+          pingChart.data.labels = pingData.labels;
+          pingChart.data.datasets[0].data = pingData.values;
+          
+          // Update display
+          pingDisplay.textContent = ping + " ms";
+          pingDisplay.classList.add('pulse');
+          setTimeout(() => pingDisplay.classList.remove('pulse'), 300);
+          
+          // Update status
+          if (ping < 80) {
+            pingDisplay.style.color = '#4ade80';
+            pingStatus.textContent = "Sangat Baik";
+            pingStatus.style.backgroundColor = '#4ade80';
+          } else if (ping < 150) {
+            pingDisplay.style.color = '#facc15';
+            pingStatus.textContent = "Baik";
+            pingStatus.style.backgroundColor = '#facc15';
+          } else if (ping < 300) {
+            pingDisplay.style.color = '#fb923c';
+            pingStatus.textContent = "Sedang";
+            pingStatus.style.backgroundColor = '#fb923c';
+          } else {
+            pingDisplay.style.color = '#f87171';
+            pingStatus.textContent = "Buruk";
+            pingStatus.style.backgroundColor = '#f87171';
+          }
+          
+          // Update chart color based on ping
+          if (ping < 100) {
+            pingChart.data.datasets[0].borderColor = '#4ade80';
+          } else if (ping < 200) {
+            pingChart.data.datasets[0].borderColor = '#facc15';
+          } else {
+            pingChart.data.datasets[0].borderColor = '#f87171';
+          }
+          
+          pingChart.update();
+          
+          // Add to history
+          counter++;
+          if (counter % 2 === 0) { // Setiap 5 detik (2x 2.5s)
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            
+            let pingClass = '';
+            if (ping < 80) pingClass = 'ping-good';
+            else if (ping < 150) pingClass = 'ping-ok';
+            else pingClass = 'ping-bad';
+            
+            historyItem.innerHTML = `
+              <span class="history-time">${time}</span>
+              <span class="ping-ms ${pingClass}">${ping} ms</span>
+            `;
+            
+            pingHistoryDiv.prepend(historyItem);
+            if (pingHistoryDiv.childNodes.length > 50) {
+              pingHistoryDiv.removeChild(pingHistoryDiv.lastChild);
+            }
+          }
+          
+          // Update stats
+          updateStats(ping);
+        })
+        .catch(() => {
+          pingDisplay.style.color = '#9ca3af';
+          pingDisplay.textContent = "Error";
+          pingStatus.textContent = "Tidak Terhubung";
+          pingStatus.style.backgroundColor = '#9ca3af';
+        });
+    }
+    
+    // Initialize
+    detectNetwork();
+    setInterval(updatePing, 2500);
+    updatePing(); // Initial call
+  </script>
+</body>
+  </html>
