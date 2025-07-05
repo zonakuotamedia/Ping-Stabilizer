@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Ping Stabilizer | Professional Edition</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Tes Ping Stabilizer | Professional Edition</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -16,7 +16,7 @@
       --danger: #f87171;
       --light: #f8f9fa;
       --dark: #212529;
-      --card-bg: rgba(255, 255, 255, 0.85);
+      --card-bg: rgba(255, 255, 255, 0.9);
       --chart-gradient-start: rgba(76, 201, 240, 0.3);
       --chart-gradient-end: rgba(67, 97, 238, 0.1);
     }
@@ -26,36 +26,44 @@
       padding: 0;
       box-sizing: border-box;
       font-family: 'Segoe UI', 'Poppins', sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
     
     body {
       background: linear-gradient(135deg, #667eea, #764ba2);
       color: var(--dark);
       min-height: 100vh;
-      padding: 20px;
+      padding: 15px;
       display: flex;
       justify-content: center;
       align-items: center;
+      touch-action: manipulation;
+      overflow: hidden;
     }
     
     .container {
-      max-width: 800px;
+      max-width: 500px;
       width: 100%;
       background: var(--card-bg);
-      border-radius: 20px;
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      border-radius: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
       overflow: hidden;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+      overflow-y: auto;
+      max-height: 95vh;
     }
     
+    /* Header dengan animasi halus */
     header {
       background: linear-gradient(to right, var(--primary), var(--secondary));
       color: white;
-      padding: 25px;
+      padding: 25px 20px;
       text-align: center;
       position: relative;
       overflow: hidden;
+      transition: all 0.3s ease;
     }
     
     header::before {
@@ -67,159 +75,188 @@
       height: 200%;
       background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
       transform: rotate(30deg);
+      animation: rotateGradient 15s linear infinite;
+    }
+    
+    @keyframes rotateGradient {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
     
     h1 {
-      font-size: 2.2rem;
+      font-size: 1.7rem;
       margin-bottom: 8px;
       position: relative;
       z-index: 2;
       text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
     }
     
     .subtitle {
-      font-size: 1rem;
+      font-size: 0.9rem;
       opacity: 0.9;
       position: relative;
       z-index: 2;
+      transition: all 0.3s ease;
     }
     
+    /* Bagian utama dengan efek smooth scrolling */
     .ping-section {
-      padding: 30px;
+      padding: 20px;
       text-align: center;
       position: relative;
+      transition: all 0.4s ease;
     }
     
     .ping-info {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 25px;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 20px;
       background: white;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      border-radius: 18px;
+      padding: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.07);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .ping-info:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
     
     .ping-card {
       text-align: center;
-      padding: 15px;
-      flex: 1;
+      padding: 12px;
     }
     
     .ping-card h3 {
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: var(--secondary);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
     }
     
     #ping-value {
-      font-size: 2.8rem;
+      font-size: 2.5rem;
       font-weight: 800;
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       margin: 5px 0;
+      min-height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     
     .ping-status {
       display: inline-block;
-      padding: 5px 15px;
+      padding: 6px 18px;
       border-radius: 20px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      margin-top: 10px;
+      margin-top: 5px;
+      transition: all 0.3s ease;
     }
     
     .chart-container {
       background: white;
-      border-radius: 15px;
-      padding: 20px;
-      margin-bottom: 25px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      border-radius: 18px;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.07);
+      transition: all 0.3s ease;
     }
     
     canvas {
       width: 100%;
-      height: 200px;
-    }
-    
-    .history-container {
-      background: white;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-    }
-    
-    .history-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-    
-    .history-header h2 {
-      font-size: 1.3rem;
-      color: var(--secondary);
-    }
-    
-    #history {
-      max-height: 200px;
-      overflow-y: auto;
-      text-align: left;
-    }
-    
-    .history-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-    }
-    
-    .history-time {
-      color: #6c757d;
-    }
-    
-    .ping-ms {
-      font-weight: 600;
+      height: 180px;
     }
     
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin-top: 25px;
+      gap: 12px;
+      margin-top: 20px;
     }
     
     .stat-card {
       background: white;
-      border-radius: 15px;
-      padding: 20px;
+      border-radius: 18px;
+      padding: 18px 10px;
       text-align: center;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.07);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
     
     .stat-card i {
-      font-size: 2rem;
+      font-size: 1.8rem;
       color: var(--primary);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
     }
     
     .stat-card h3 {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       margin-bottom: 5px;
       color: var(--secondary);
+      transition: all 0.3s ease;
     }
     
     .stat-card p {
       color: #6c757d;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+    }
+    
+    .control-panel {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 25px;
+    }
+    
+    .control-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 25px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .control-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
+      background: var(--secondary);
+    }
+    
+    .control-btn:active {
+      transform: translateY(1px);
     }
     
     footer {
       text-align: center;
-      padding: 20px;
+      padding: 15px;
       color: #6c757d;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       border-top: 1px solid rgba(0,0,0,0.05);
+      margin-top: 10px;
     }
     
     /* Animations */
@@ -229,51 +266,98 @@
       100% { transform: scale(1); }
     }
     
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
     .pulse {
       animation: pulse 0.5s ease;
     }
     
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    
+    /* Responsive design untuk Android */
+    @media (max-width: 480px) {
+      .container {
+        border-radius: 20px;
+        max-height: 98vh;
+      }
+      
+      header {
+        padding: 20px 15px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      .subtitle {
+        font-size: 0.8rem;
+      }
+      
+      .ping-section {
+        padding: 15px;
+      }
+      
+      #ping-value {
+        font-size: 2.2rem;
+      }
+      
+      .ping-status {
+        padding: 5px 15px;
+        font-size: 0.8rem;
+      }
+      
+      .stat-card {
+        padding: 15px 8px;
+      }
+      
+      .stat-card i {
+        font-size: 1.5rem;
+      }
+      
+      .stat-card h3 {
+        font-size: 1.4rem;
+      }
+      
+      .stat-card p {
+        font-size: 0.8rem;
+      }
+      
+      .control-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+      }
+    }
+    
     /* Scrollbar styling */
-    #history::-webkit-scrollbar {
+    ::-webkit-scrollbar {
       width: 6px;
     }
     
-    #history::-webkit-scrollbar-track {
+    ::-webkit-scrollbar-track {
       background: rgba(0,0,0,0.05);
       border-radius: 10px;
     }
     
-    #history::-webkit-scrollbar-thumb {
+    ::-webkit-scrollbar-thumb {
       background: var(--accent);
       border-radius: 10px;
-    }
-    
-    /* Responsive design */
-    @media (max-width: 768px) {
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .ping-info {
-        flex-direction: column;
-        gap: 20px;
-      }
-      
-      h1 {
-        font-size: 1.8rem;
-      }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1><i class="fas fa-wifi"></i> Stabilizer Ping Game Android</h1>
-      <p class="subtitle">Monitor koneksi jaringan Anda secara real-time untuk pengalaman gaming terbaik</p>
+      <h1><i class="fas fa-bolt"></i> Stabilizer Ping Game Android</h1>
+      <p class="subtitle">Optimalkan koneksi untuk pengalaman gaming terbaik</p>
     </header>
     
     <section class="ping-section">
-      <div class="ping-info">
+      <div class="ping-info fade-in">
         <div class="ping-card">
           <h3>PING SEKARANG</h3>
           <div id="ping-value">Mengukur...</div>
@@ -287,38 +371,37 @@
         </div>
       </div>
       
-      <div class="chart-container">
+      <div class="chart-container fade-in">
         <canvas id="pingChart"></canvas>
       </div>
       
       <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card fade-in">
           <i class="fas fa-bolt"></i>
           <h3 id="min-ping">-</h3>
-          <p>PING TERENDAH</p>
+          <p>TERENDAH</p>
         </div>
         
-        <div class="stat-card">
+        <div class="stat-card fade-in" style="animation-delay: 0.1s">
           <i class="fas fa-chart-line"></i>
           <h3 id="avg-ping">-</h3>
           <p>RATA-RATA</p>
         </div>
         
-        <div class="stat-card">
+        <div class="stat-card fade-in" style="animation-delay: 0.2s">
           <i class="fas fa-exclamation-triangle"></i>
           <h3 id="max-ping">-</h3>
-          <p>PING TERTINGGI</p>
+          <p>TERTINGGI</p>
         </div>
       </div>
       
-      <div class="history-container">
-        <div class="history-header">
-          <h2><i class="fas fa-history"></i> Riwayat Ping</h2>
-          <button id="clear-history"><i class="fas fa-trash"></i> Bersihkan</button>
-        </div>
-        <div id="history">
-          <div id="ping-history"></div>
-        </div>
+      <div class="control-panel">
+        <button class="control-btn" id="optimize-btn">
+          <i class="fas fa-rocket"></i> Optimalkan
+        </button>
+        <button class="control-btn" id="refresh-btn">
+          <i class="fas fa-sync-alt"></i> Segarkan
+        </button>
       </div>
     </section>
     
@@ -332,13 +415,13 @@
     const pingDisplay = document.getElementById('ping-value');
     const pingStatus = document.getElementById('ping-status');
     const ctx = document.getElementById('pingChart').getContext('2d');
-    const pingHistoryDiv = document.getElementById('ping-history');
     const minPingEl = document.getElementById('min-ping');
     const avgPingEl = document.getElementById('avg-ping');
     const maxPingEl = document.getElementById('max-ping');
-    const clearHistoryBtn = document.getElementById('clear-history');
     const networkTypeEl = document.getElementById('network-type');
     const networkStrengthEl = document.getElementById('network-strength');
+    const optimizeBtn = document.getElementById('optimize-btn');
+    const refreshBtn = document.getElementById('refresh-btn');
     
     // Data arrays
     const pingData = {
@@ -347,7 +430,7 @@
     };
     
     // Chart configuration
-    const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+    const gradient = ctx.createLinearGradient(0, 0, 0, 180);
     gradient.addColorStop(0, 'rgba(76, 201, 240, 0.5)');
     gradient.addColorStop(1, 'rgba(67, 97, 238, 0.1)');
     
@@ -384,7 +467,7 @@
             ticks: {
               maxRotation: 0,
               autoSkip: true,
-              maxTicksLimit: 8
+              maxTicksLimit: 6
             }
           },
           y: {
@@ -426,6 +509,7 @@
     let totalPing = 0;
     let pingCount = 0;
     let counter = 0;
+    let isOptimized = false;
     
     // Network detection
     function detectNetwork() {
@@ -446,12 +530,16 @@
       if (ping < minPing) {
         minPing = ping;
         minPingEl.textContent = `${ping} ms`;
+        minPingEl.classList.add('pulse');
+        setTimeout(() => minPingEl.classList.remove('pulse'), 300);
       }
       
       // Update max ping
       if (ping > maxPing) {
         maxPing = ping;
         maxPingEl.textContent = `${ping} ms`;
+        maxPingEl.classList.add('pulse');
+        setTimeout(() => maxPingEl.classList.remove('pulse'), 300);
       }
       
       // Update average
@@ -461,21 +549,23 @@
       avgPingEl.textContent = `${avg} ms`;
     }
     
-    // Clear history
-    clearHistoryBtn.addEventListener('click', () => {
-      pingHistoryDiv.innerHTML = '';
-    });
-    
     // Ping function
     function updatePing() {
       const start = performance.now();
-      fetch("https://dns.google/resolve?name=google.com", { cache: "no-store" })
+      fetch("https://dns.google/resolve?name=google.com", { 
+        cache: "no-store",
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      })
         .then(() => {
           const ping = Math.round(performance.now() - start);
           const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           
           // Add to chart
-          if (pingData.labels.length > 15) {
+          if (pingData.labels.length > 12) {
             pingData.labels.shift();
             pingData.values.shift();
           }
@@ -522,28 +612,6 @@
           
           pingChart.update();
           
-          // Add to history
-          counter++;
-          if (counter % 2 === 0) { // Setiap 5 detik (2x 2.5s)
-            const historyItem = document.createElement('div');
-            historyItem.className = 'history-item';
-            
-            let pingClass = '';
-            if (ping < 80) pingClass = 'ping-good';
-            else if (ping < 150) pingClass = 'ping-ok';
-            else pingClass = 'ping-bad';
-            
-            historyItem.innerHTML = `
-              <span class="history-time">${time}</span>
-              <span class="ping-ms ${pingClass}">${ping} ms</span>
-            `;
-            
-            pingHistoryDiv.prepend(historyItem);
-            if (pingHistoryDiv.childNodes.length > 50) {
-              pingHistoryDiv.removeChild(pingHistoryDiv.lastChild);
-            }
-          }
-          
           // Update stats
           updateStats(ping);
         })
@@ -555,10 +623,64 @@
         });
     }
     
+    // Optimize function
+    function optimizeConnection() {
+      if (isOptimized) return;
+      
+      optimizeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+      optimizeBtn.disabled = true;
+      
+      // Simulate optimization process
+      setTimeout(() => {
+        isOptimized = true;
+        
+        // Visual feedback
+        document.body.style.background = 'linear-gradient(135deg, #4ade80, #3b82f6)';
+        pingStatus.textContent = "Dioptimalkan";
+        pingStatus.style.backgroundColor = '#3b82f6';
+        
+        optimizeBtn.innerHTML = '<i class="fas fa-check"></i> Dioptimalkan';
+        optimizeBtn.style.background = '#10b981';
+        
+        // Add pulse effect to all cards
+        document.querySelectorAll('.stat-card, .ping-card').forEach(card => {
+          card.classList.add('pulse');
+          setTimeout(() => card.classList.remove('pulse'), 500);
+        });
+        
+        // Reset after 10 seconds
+        setTimeout(() => {
+          isOptimized = false;
+          document.body.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+          optimizeBtn.innerHTML = '<i class="fas fa-rocket"></i> Optimalkan';
+          optimizeBtn.style.background = '';
+          optimizeBtn.disabled = false;
+        }, 10000);
+      }, 2000);
+    }
+    
+    // Event listeners
+    optimizeBtn.addEventListener('click', optimizeConnection);
+    
+    refreshBtn.addEventListener('click', () => {
+      refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memuat...';
+      setTimeout(() => {
+        location.reload();
+      }, 800);
+    });
+    
     // Initialize
     detectNetwork();
     setInterval(updatePing, 2500);
     updatePing(); // Initial call
+    
+    // Add fade-in animations to elements
+    setTimeout(() => {
+      document.querySelectorAll('.fade-in').forEach(el => {
+        el.style.opacity = 1;
+        el.style.transform = 'translateY(0)';
+      });
+    }, 100);
   </script>
 </body>
 </html>
